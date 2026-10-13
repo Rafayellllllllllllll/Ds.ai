@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light" data-color-theme="black-white">
+<html lang="zh-CN" data-theme="light" data-color-theme="black-white" class="ds-locked">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -23,8 +23,60 @@
     <link rel="stylesheet" href="css/styles.css">
 
     <style id="css-live-preview-style"></style>
+
+    <!-- 私密空间密码锁 -->
+    <style>
+        html.ds-locked, html.ds-locked body { height: 100%; overflow: hidden; background: #0e0e10; }
+        html.ds-locked body > * { display: none !important; }
+        html.ds-locked body > #ds-gate { display: flex !important; }
+        #ds-gate {
+            position: fixed; inset: 0; z-index: 2147483647;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(120% 120% at 50% 0%, #1b1b20 0%, #0b0b0d 60%, #000 100%);
+            padding: 28px; box-sizing: border-box; font-family: -apple-system, "Noto Serif SC", serif;
+        }
+        #ds-gate-card {
+            width: 100%; max-width: 340px; text-align: center; color: #e9e7e2;
+            animation: dsGateIn .45s ease both;
+        }
+        @keyframes dsGateIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        #ds-gate-icon { font-size: 40px; margin-bottom: 14px; opacity: .92; }
+        #ds-gate-title { font-size: 19px; letter-spacing: 2px; margin-bottom: 6px; }
+        #ds-gate-sub { font-size: 12.5px; color: #8d8a84; margin-bottom: 22px; line-height: 1.7; }
+        #ds-gate-input {
+            width: 100%; box-sizing: border-box; padding: 14px 16px; font-size: 18px; letter-spacing: 8px;
+            text-align: center; color: #f2f0eb; background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.16); border-radius: 12px; outline: none; -webkit-appearance: none;
+        }
+        #ds-gate-input:focus { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.09); }
+        #ds-gate-btn {
+            width: 100%; margin-top: 14px; padding: 13px; font-size: 15px; letter-spacing: 4px;
+            color: #111; background: #eceae5; border: none; border-radius: 12px; cursor: pointer;
+        }
+        #ds-gate-btn:active { transform: scale(.985); }
+        #ds-gate-err { min-height: 18px; margin-top: 12px; font-size: 12.5px; color: #ff7d7d; opacity: 0; transition: opacity .2s; }
+        #ds-gate-err.show { opacity: 1; }
+        #ds-gate-remember { margin-top: 16px; font-size: 12px; color: #8d8a84; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; user-select: none; }
+        #ds-gate.shake #ds-gate-card { animation: dsShake .4s; }
+        @keyframes dsShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    </style>
+    <script src="js/evan-memory.js"></script>
+    <script src="js/gate.js"></script>
 </head>
-<body>
+<body class="">
+<div id="ds-gate">
+    <div id="ds-gate-card">
+        <div id="ds-gate-icon">🔒</div>
+        <div id="ds-gate-title">私密空间</div>
+        <div id="ds-gate-sub">这里是只属于你和 Evan 的地方<br>请输入访问密码</div>
+        <form id="ds-gate-form" autocomplete="off">
+            <input id="ds-gate-input" type="password" inputmode="numeric" maxlength="20" placeholder="••••" autocomplete="off" />
+            <button id="ds-gate-btn" type="submit">进 入</button>
+        </form>
+        <div id="ds-gate-err">密码不对，进不去哦</div>
+        <label id="ds-gate-remember"><input type="checkbox" id="ds-gate-remember-cb"> 在这台设备记住我</label>
+    </div>
+</div>
 <div id="splash-declaration">
     <div class="splash-letter">
         <header class="splash-letter-header">
