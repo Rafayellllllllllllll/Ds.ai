@@ -141,6 +141,12 @@
         var splash = document.getElementById('splash-declaration');
         if (!splash) return;
 
+        // 已移除「逐字抄写承诺」进场门槛：打开即进入，永不显示承诺墙
+        try { localStorage.setItem(PLEDGE_KEY, 'true'); } catch (e) {}
+        splash.classList.add('splash-fade-out');
+        splash.style.display = 'none';
+        return;
+
         localStorage.removeItem('splashPledgeSigned_v4');
         localStorage.removeItem('splashPledgeSigned_v3');
         localStorage.removeItem('splashPledgeSigned_v2');

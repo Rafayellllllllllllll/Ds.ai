@@ -62,8 +62,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         setInterval(checkStatusChange, 60000);
 
         if (disclaimerModal) {
-            const tourSeen = await safeAwait(localforage?.getItem(APP_PREFIX + 'tour_seen'), false);
-            
+            // 已跳过首次免责声明弹窗与 20 步强制引导教程；教程可在「设置→数据管理→重放教程」随时查看
+            const tourSeen = true;
+            try { localforage?.setItem(APP_PREFIX + 'tour_seen', true).catch(() => {}); } catch (e) {}
+
             if (!tourSeen) {
                 showModal(disclaimerModal);
                 
