@@ -27,7 +27,7 @@
     return baseKey.then(function (bk) {
       return crypto.subtle.deriveKey(
         { name: 'PBKDF2', salt: saltBuf, iterations: 200000, hash: 'SHA-256' },
-        bk, { name: 'AES-GCM', length: 256 }, false, ['decrypt', 'encrypt']
+        bk, { name: 'AES-GCM', length: 256 }, true, ['decrypt', 'encrypt']
       );
     });
   }
@@ -59,24 +59,33 @@
     if (input) { input.value = ''; input.focus(); }
   }
 
+  var SESSION_KEY = 'DS_GATE_SESSION_V1';
+  function rawToB64(raw) {
+    var bytes = new Uint8Array(raw);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+
   /* 解锁成功：注入记忆、放开页面、把名字设成 Evan / Iris */
   function unlock(memoryText, key, remember) {
     if (unlocked) return;
     unlocked = true;
     try { window.__EVAN_MEMORY__ = memoryText; } catch (e) {}
-    if (remember && key) {
+    if (key && key.extractable) {
       crypto.subtle.exportKey('raw', key).then(function (raw) {
-        var bytes = new Uint8Array(raw);
-        var bin = '';
-        for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-        localStorage.setItem(KEY_STORE, btoa(bin));
+        var b64 = rawToB64(raw);
+        // 会话级保存：同一标签页内同步刷新/重载时免再输密码（关掉标签即失效）
+        try { sessionStorage.setItem(SESSION_KEY, b64); } catch (e) {}
+        // 勾选“记住我”：本机长期保存
+        if (remember) { try { localStorage.setItem(KEY_STORE, b64); } catch (e) {} }
       }).catch(function () {});
     }
     var root = document.documentElement;
     root.classList.remove('ds-locked');
     var gate = document.getElementById('ds-gate');
     if (gate) gate.remove();
-    try { document.dispatchEvent(new CustomEvent('ds:unlocked', { detail: { memory: memoryText } })); } catch (e) {}
+    try { document.dispatchEvent(new CustomEvent('ds:unlocked', { detail: { memory: memoryText, key: key } })); } catch (e) {}
     scheduleDefaultNames();
   }
 
@@ -132,22 +141,22 @@
       });
     });
 
-    // 勾选过“记住我”：用本机保存的密钥自动解锁，无需再输
+    // 免密自动解锁：优先会话级（同标签页重载），其次本机“记住我”
     var savedRaw = null;
-    try { savedRaw = localStorage.getItem(KEY_STORE); } catch (e) {}
+    try { savedRaw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(KEY_STORE); } catch (e) {}
     if (savedRaw) {
       try {
         var bin = atob(savedRaw);
         var bytes = new Uint8Array(bin.length);
         for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         crypto.subtle.importKey(
-          'raw', bytes, { name: 'AES-GCM' }, false, ['decrypt']
+          'raw', bytes, { name: 'AES-GCM' }, true, ['decrypt']
         ).then(function (key) {
           return decryptWith(key, bundle).then(function (plainBuf) {
-            unlock(bufToUtf8(plainBuf), null, false);
+            unlock(bufToUtf8(plainBuf), key, false);
           });
         }).catch(function () {
-          try { localStorage.removeItem(KEY_STORE); } catch (e) {}
+          try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(KEY_STORE); } catch (e) {}
           if (input) input.focus();
         });
       } catch (e) { if (input) input.focus(); }

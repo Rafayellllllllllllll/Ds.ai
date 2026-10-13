@@ -13,9 +13,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://file.youtochat.com/images/20260216/1771224856844_qdqqd.jpeg">
-    <link rel="apple-touch-icon" href="https://file.youtochat.com/images/20260216/1771224856844_qdqqd.jpeg">
-    <meta name="apple-mobile-web-app-title" content="ʚ𝑳𝑶𝑽𝑬ɞ">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="apple-mobile-web-app-title" content="Evan">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -62,6 +64,7 @@
     </style>
     <script src="js/evan-memory.js"></script>
     <script src="js/gate.js"></script>
+    <script src="js/sync.js"></script>
 </head>
 <body class="">
 <div id="ds-gate">
@@ -2290,5 +2293,13 @@
     <script src="js/listeners.js"></script>
     <script src="js/app.js"></script>
     <script src="js/ai-deepseek.js"></script>
+    <script>
+      // 注册 Service Worker：支持“安装到桌面”和离线打开外壳（sw.js 位于站点根目录）
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function (e) { console.warn('SW 注册失败', e); });
+        });
+      }
+    </script>
 </body>
 </html>
